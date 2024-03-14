@@ -62,6 +62,17 @@ def escape_filename_distribution_name(name):
     return normalize_package_name(name).replace("-", "_")
 
 
+def load_version_from_file(version_file):
+    """Load fsdfds
+
+    """
+
+
+    try:
+        return str(packaging.version.Version(f"{substituted}{delimiter}{sanitized}"))
+    except packaging.version.InvalidVersion:
+        return str(packaging.version.Version(f"0+{sanitized}"))
+
 def normalize_pep440(version):
     """Normalize version according to PEP 440, with fallback for placeholders.
 
@@ -219,6 +230,7 @@ class WheelMaker(object):
         self,
         name,
         version,
+        version_file,
         build_tag,
         python_tag,
         abi,
@@ -363,6 +375,11 @@ def parse_args() -> argparse.Namespace:
         "--version", required=True, type=str, help="Version of the distribution"
     )
     metadata_group.add_argument(
+        "--version_file",
+        type=Path,
+        help="A file containing a version",
+    )
+    metadata_group.add_argument(
         "--build_tag",
         type=str,
         default="",
@@ -487,7 +504,10 @@ def main() -> None:
     else:
         name = arguments.name
 
-    if arguments.volatile_status_file and arguments.stable_status_file:
+    if arguments.version_file:
+        with open(arguments.version_file) as _file:
+            version = _file.read()
+    elif arguments.volatile_status_file and arguments.stable_status_file:
         version = resolve_argument_stamp(
             arguments.version,
             arguments.volatile_status_file,

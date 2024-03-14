@@ -94,6 +94,72 @@ def _test_content_type_from_description_impl(env, target):
 
 _tests.append(_test_content_type_from_description)
 
+def _test_version_file(name):
+    rt_util.helper_target(
+        py_wheel,
+        name = name + "_subject",
+        distribution = "mydist_" + name,
+        version_file = ":version.txt",
+        description_file = "desc.md",
+    )
+    analysis_test(
+        name = name,
+        impl = _test_version_file_impl,
+        target = name + "_subject",
+    )
+
+def _test_version_file_impl(env, target):
+    action = env.expect.that_target(target).action_generating(
+        "{package}/{name}.metadata.txt",
+    )
+    action.content().split("\n").contains(
+        "Description-Content-Type: text/markdown",
+    )
+
+_tests.append(_test_version_file)
+
+def _test_mandatory_version_param(name):
+    rt_util.helper_target(
+        py_wheel,
+        name = name + "_subject",
+        distribution = "mydist_" + name,
+    )
+    analysis_test(
+        name = name,
+        impl = _test_mandatory_version_param_impl,
+        target = name + "_subject",
+        expect_failure = True,
+    )
+
+def _test_mandatory_version_param_impl(env, target):
+    env.expect.that_target(target).failures().contains_predicate(
+        matching.str_matches("At least one of `version` or `version_file` must be set"),
+    )
+
+_tests.append(_test_mandatory_version_param)
+
+def _test_mutually_exclusive_version_param(name):
+    rt_util.helper_target(
+        py_wheel,
+        name = name + "_subject",
+        distribution = "mydist_" + name,
+        version = "0.0.0",
+        version_file = ":version.txt",
+    )
+    analysis_test(
+        name = name,
+        impl = _test_mutually_exclusive_version_param_impl,
+        target = name + "_subject",
+        expect_failure = True,
+    )
+
+def _test_mutually_exclusive_version_param_impl(env, target):
+    env.expect.that_target(target).failures().contains_predicate(
+        matching.str_matches("Only one 'version' or 'version_file' may be set"),
+    )
+
+_tests.append(_test_mutually_exclusive_version_param)
+
 def _test_pep440_normalization(env):
     prefixes = ["v", "  v", " \t\r\nv"]
     epochs = {

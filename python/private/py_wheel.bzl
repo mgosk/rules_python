@@ -93,7 +93,6 @@ Stamped targets are not rebuilt unless their dependencies change.
         values = [1, 0, -1],
     ),
     "version": attr.string(
-        mandatory = True,
         doc = """\
 Version number of the package.
 
@@ -106,11 +105,20 @@ For example:
 Note that Bazel's output filename cannot include the stamp information, as outputs must be known
 during the analysis phase and the stamp data is available only during the action execution.
 
+Parameter mutually exclusieve with `versio_file` parameter
+
 The [`py_wheel`](#py_wheel) macro produces a `.dist`-suffix target which creates a
 `dist/` folder containing the wheel with the stamped name, suitable for publishing.
 
 See [`py_wheel_dist`](#py_wheel_dist) for more info.
 """,
+    ),
+    "version_file": attr.label(
+        allow_single_file = True,
+        doc = """
+        File containing version string.
+        Exactly one `version` or `version_file` is required
+        """,
     ),
     "_stamp_flag": attr.label(
         doc = "A setting used to determine whether or not the `--stamp` flag is enabled",
@@ -293,6 +301,11 @@ def _input_file_to_arg(input_file):
     return "%s;%s" % (py_package_lib.path_inside_wheel(input_file), input_file.path)
 
 def _py_wheel_impl(ctx):
+    if (ctx.attr.version and ctx.attr.version_file):
+        fail("Only one 'version' or 'version_file' may be set")
+    if (not ctx.attr.version and not ctx.attr.version_file):
+        fail("At least one of `version` or `version_file` must be set")
+
     abi = _replace_make_variables(ctx.attr.abi, ctx)
     python_tag = _replace_make_variables(ctx.attr.python_tag, ctx)
     version = _replace_make_variables(ctx.attr.version, ctx)
@@ -328,6 +341,8 @@ def _py_wheel_impl(ctx):
     args = ctx.actions.args()
     args.add("--name", ctx.attr.distribution)
     args.add("--version", version)
+    if ctx.attr.version_file:
+        args.add("--version_file", ctx.attr.version_file)
     args.add("--python_tag", python_tag)
     args.add("--abi", abi)
     args.add("--platform", ctx.attr.platform)
@@ -472,6 +487,8 @@ def _py_wheel_impl(ctx):
             "--extra_distinfo_file",
             filename + ";" + target_files[0].path,
         )
+    if ctx.attr.version_file:
+        other_inputs.append(ctx.file.version_file)
 
     ctx.actions.run(
         mnemonic = "PyWheel",
