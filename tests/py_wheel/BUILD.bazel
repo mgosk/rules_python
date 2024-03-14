@@ -14,5 +14,8 @@
 """Tests for py_wheel."""
 
 load(":py_wheel_tests.bzl", "py_wheel_test_suite")
+load(":py_wheel_version_tests.bzl", "py_wheel_versions_test_suite")
 
 py_wheel_test_suite(name = "py_wheel_tests")
+
+py_wheel_versions_test_suite(name = "py_wheel_version_tests")
