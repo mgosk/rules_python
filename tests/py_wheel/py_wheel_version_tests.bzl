@@ -97,7 +97,7 @@ def _test_version_from_file(name):
 
 def _test_version_from_file_impl(env, target):
     env.expect.that_target(target).default_outputs().contains(
-        "{package}/mydist_{test_name}-0.0.0-py3-none-any.whla",
+        "{package}/mydist_{test_name}-0.0.0-py3-none-any.whl",
     )
 
 _tests.append(_test_version_from_file)

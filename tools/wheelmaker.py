@@ -62,17 +62,6 @@ def escape_filename_distribution_name(name):
     return normalize_package_name(name).replace("-", "_")
 
 
-def load_version_from_file(version_file):
-    """Load fsdfds
-
-    """
-
-
-    try:
-        return str(packaging.version.Version(f"{substituted}{delimiter}{sanitized}"))
-    except packaging.version.InvalidVersion:
-        return str(packaging.version.Version(f"0+{sanitized}"))
-
 def normalize_pep440(version):
     """Normalize version according to PEP 440, with fallback for placeholders.
 
@@ -504,17 +493,20 @@ def main() -> None:
     else:
         name = arguments.name
 
-    if arguments.version_file:
-        with open(arguments.version_file) as _file:
-            version = _file.read()
-    elif arguments.volatile_status_file and arguments.stable_status_file:
-        version = resolve_argument_stamp(
-            arguments.version,
-            arguments.volatile_status_file,
-            arguments.stable_status_file,
-        )
-    else:
-        version = arguments.version
+    version = "asdsad"
+
+    # if arguments.version_file:
+    #     version = "asdsad"
+    #     # with open(arguments.version_file) as _file:
+    #     #     version = _file.read()
+    # elif arguments.volatile_status_file and arguments.stable_status_file:
+    #     version = resolve_argument_stamp(
+    #         arguments.version,
+    #         arguments.volatile_status_file,
+    #         arguments.stable_status_file,
+    #     )
+    # else:
+    #     version = arguments.version
 
     with WheelMaker(
         name=name,

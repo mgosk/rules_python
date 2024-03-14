@@ -105,7 +105,7 @@ For example:
 Note that Bazel's output filename cannot include the stamp information, as outputs must be known
 during the analysis phase and the stamp data is available only during the action execution.
 
-Parameter mutually exclusieve with `versio_file` parameter
+Parameter mutually exclusive with `version_file` parameter
 
 The [`py_wheel`](#py_wheel) macro produces a `.dist`-suffix target which creates a
 `dist/` folder containing the wheel with the stamped name, suitable for publishing.
@@ -308,7 +308,7 @@ def _py_wheel_impl(ctx):
 
     abi = _replace_make_variables(ctx.attr.abi, ctx)
     python_tag = _replace_make_variables(ctx.attr.python_tag, ctx)
-    version = _replace_make_variables(ctx.attr.version, ctx)
+    version = "4.1dev0+gab0f78"  # _replace_make_variables(ctx.attr.version, ctx)
 
     filename_segments = [
         _escape_filename_distribution_name(ctx.attr.distribution),
